@@ -28,7 +28,7 @@ public class ActualizarTiendaServlet extends HttpServlet {
                 stmt.setInt(2, idTienda);
                 stmt.executeUpdate();
             }
-            response.sendRedirect("tiendas.jsp");
+            response.sendRedirect("tiendas.jsp"); // Redirige a la lista de tiendas
         } catch (SQLException e) {
             e.printStackTrace();
             response.sendRedirect("error.jsp");
