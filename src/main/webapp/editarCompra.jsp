@@ -5,20 +5,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nueva Compra</title>
+    <title>Editar Compra</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h2>Nueva Compra</h2>
-        <form action="GuardarCompraServlet" method="post">
+        <h2>Editar Compra</h2>
+        <form action="ActualizarCompraServlet" method="post">
+            <input type="hidden" id="idCompra" name="idCompra" value="${compra.idCompra}">
             <div class="form-group">
                 <label for="fechaCompra">Fecha:</label>
-                <input type="date" id="fechaCompra" name="fechaCompra" class="form-control" required>
+                <input type="date" id="fechaCompra" name="fechaCompra" class="form-control" value="${compra.fechaCompra}" required>
             </div>
             <div class="form-group">
                 <label for="importeCompra">Importe:</label>
-                <input type="number" step="0.01" id="importeCompra" name="importeCompra" class="form-control" required>
+                <input type="number" step="0.01" id="importeCompra" name="importeCompra" class="form-control" value="${compra.importeCompra}" required>
             </div>
             <div class="form-group">
                 <label for="idTiendaFK">Tienda:</label>
@@ -27,7 +28,7 @@
                     <%
                         // Aquí puedes cargar las tiendas desde la base de datos
                         // Ejemplo:
-                        // <option value="1">Tienda 1</option>
+                        // <option value="1" ${compra.idTiendaFK == 1 ? "selected" : ""}>Tienda 1</option>
                     %>
                 </select>
             </div>
@@ -40,4 +41,3 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
-

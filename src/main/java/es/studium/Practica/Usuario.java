@@ -1,4 +1,4 @@
-package es.studium.LoginServlet;
+package es.studium.Practica;
 
 public class Usuario {
     private int idUsuario;

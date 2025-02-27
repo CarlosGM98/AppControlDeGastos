@@ -1,4 +1,4 @@
-package es.studium.LoginServlet;
+package es.studium.Practica;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
