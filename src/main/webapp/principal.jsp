@@ -59,7 +59,7 @@
                         try {
                             // Usar la clase ConexionBD para obtener la conexión
                             Connection conn = ConexionBD.getConnection();
-                            String query = "SELECT c.fechaCompra, t.nombreTienda, c.importeCompra, c.idCompra " +
+                            String query = "SELECT c.fechaCompra, t.nombreTienda, c.importeCompra, c.idCompra, c.idTiendaFK " +
                                            "FROM Compras c " +
                                            "JOIN Tiendas t ON c.idTiendaFK = t.idTienda " +
                                            "WHERE MONTH(c.fechaCompra) = ? AND YEAR(c.fechaCompra) = ? " +
@@ -75,7 +75,7 @@
                         <td><%= rs.getDate("fechaCompra") %></td>
                         <td><%= rs.getString("nombreTienda") %></td>
                         <td><%= rs.getDouble("importeCompra") %> €</td>
-                        <td><a href="editarCompra.jsp?id=<%= rs.getInt("idCompra") %>" class="btn btn-warning">Editar</a></td>
+                        <td><a href="editarCompra.jsp?id=<%= rs.getInt("idCompra") %>&fecha=<%= rs.getDate("fechaCompra") %>&importe=<%= rs.getDouble("importeCompra") %>&tienda=<%= rs.getInt("idTiendaFK") %>" class="btn btn-warning">Editar</a></td>
                         <td><a href="#" onclick="confirmarBorrado(<%= rs.getInt("idCompra") %>)" class="btn btn-danger">Borrar</a></td>
                     </tr>
                     <%
@@ -106,4 +106,5 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
+
 

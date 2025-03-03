@@ -1,9 +1,10 @@
 package es.studium.Practica;
 
+
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,20 +14,29 @@ import javax.servlet.http.HttpServletResponse;
 
 @WebServlet("/EliminarTiendaServlet")
 public class EliminarTiendaServlet extends HttpServlet {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/practicatema4";
-    private static final String DB_USER = "usuarioPractica";
-    private static final String DB_PASSWORD = "Studium2024;";
-
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int idTienda = Integer.parseInt(request.getParameter("id"));
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            String query = "DELETE FROM Tiendas WHERE idTienda = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, idTienda);
-                stmt.executeUpdate();
+        try (Connection conn = ConexionBD.getConnection()) {
+            // Verificar si la tienda tiene compras asociadas
+            String queryCheck = "SELECT COUNT(*) AS totalCompras FROM Compras WHERE idTiendaFK = ?";
+            try (PreparedStatement stmtCheck = conn.prepareStatement(queryCheck)) {
+                stmtCheck.setInt(1, idTienda);
+                ResultSet rsCheck = stmtCheck.executeQuery();
+                if (rsCheck.next() && rsCheck.getInt("totalCompras") > 0) {
+                    // La tienda tiene compras asociadas
+                    response.sendRedirect("tiendas.jsp?mensaje=No se puede eliminar la tienda porque tiene compras asociadas.");
+                    return;
+                }
             }
-            response.sendRedirect("tiendas.jsp"); // Redirige a la lista de tiendas
+
+            // Si no tiene compras asociadas, eliminar la tienda
+            String queryDelete = "DELETE FROM Tiendas WHERE idTienda = ?";
+            try (PreparedStatement stmtDelete = conn.prepareStatement(queryDelete)) {
+                stmtDelete.setInt(1, idTienda);
+                stmtDelete.executeUpdate();
+            }
+            response.sendRedirect("tiendas.jsp?mensaje=Tienda borrada exitosamente"); // Redirige a la lista de tiendas con un mensaje de éxito
         } catch (SQLException e) {
             e.printStackTrace();
             response.sendRedirect("error.jsp");

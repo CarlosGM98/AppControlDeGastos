@@ -12,12 +12,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Tiendas</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        function confirmarBorrado(idTienda) {
+            if (confirm("¿Estás seguro de que deseas borrar esta tienda?")) {
+                window.location.href = "EliminarTiendaServlet?id=" + idTienda;
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container mt-4">
         <h2>Gestión de Tiendas</h2>
         <a href="nuevaTienda.jsp" class="btn btn-primary mb-3">Nueva Tienda</a>
         <a href="principal.jsp" class="btn btn-secondary mb-3">Volver</a>
+
+        <!-- Mensaje de éxito o error -->
+        <%
+            String mensaje = request.getParameter("mensaje");
+            if (mensaje != null) {
+        %>
+        <div class="alert alert-warning" role="alert">
+            <%= mensaje %>
+        </div>
+        <%
+            }
+        %>
 
         <!-- Tabla de Tiendas -->
         <div class="table-responsive">
@@ -45,7 +64,7 @@
                         <td><%= rs.getString("nombreTienda") %></td>
                         <td>
                             <a href="editarTienda.jsp?id=<%= rs.getInt("idTienda") %>" class="btn btn-warning">Editar</a>
-                            <a href="EliminarTiendaServlet?id=<%= rs.getInt("idTienda") %>" class="btn btn-danger">Borrar</a>
+                            <a href="#" onclick="confirmarBorrado(<%= rs.getInt("idTienda") %>)" class="btn btn-danger">Borrar</a>
                         </td>
                     </tr>
                     <%
@@ -68,4 +87,3 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
-
