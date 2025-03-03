@@ -1,4 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.sql.Connection" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.ResultSet" %>
+<%@ page import="es.studium.Practica.ConexionBD" %>
+<%@ page import="java.util.Calendar" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -15,11 +21,26 @@
             margin-top: 20px;
         }
     </style>
+    <script>
+        function confirmarBorrado(idCompra) {
+            if (confirm("¿Estás seguro de que deseas borrar esta compra?")) {
+                window.location.href = "EliminarCompraServlet?id=" + idCompra;
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
         <h2>Gestión Doméstica</h2>
-        <h3>Compras del Mes Actual</h3>
+        <%
+            // Obtener el mes actual
+            Calendar cal = Calendar.getInstance();
+            int mesActual = cal.get(Calendar.MONTH) + 1; // Los meses en Calendar son 0-11
+            int añoActual = cal.get(Calendar.YEAR);
+            SimpleDateFormat monthFormat = new SimpleDateFormat("MMMM");
+            String nombreMesActual = monthFormat.format(cal.getTime());
+        %>
+        <h3>Compras del Mes Actual (<%= nombreMesActual %> <%= añoActual %>)</h3>
 
         <!-- Tabla de Compras -->
         <div class="table-responsive">
@@ -35,15 +56,37 @@
                 </thead>
                 <tbody>
                     <%
-                        // Aquí puedes cargar las compras del mes actual desde la base de datos
-                        // Ejemplo:
-                        // <tr>
-                        //     <td>22/01/2023</td>
-                        //     <td>Mercamona</td>
-                        //     <td>10.50 €</td>
-                        //     <td><a href="editarCompra.jsp?id=1" class="btn btn-warning">Editar</a></td>
-                        //     <td><a href="EliminarCompraServlet?id=1" class="btn btn-danger">Borrar</a></td>
-                        // </tr>
+                        try {
+                            // Usar la clase ConexionBD para obtener la conexión
+                            Connection conn = ConexionBD.getConnection();
+                            String query = "SELECT c.fechaCompra, t.nombreTienda, c.importeCompra, c.idCompra " +
+                                           "FROM Compras c " +
+                                           "JOIN Tiendas t ON c.idTiendaFK = t.idTienda " +
+                                           "WHERE MONTH(c.fechaCompra) = ? AND YEAR(c.fechaCompra) = ? " +
+                                           "ORDER BY c.fechaCompra DESC";
+                            PreparedStatement stmt = conn.prepareStatement(query);
+                            stmt.setInt(1, mesActual);
+                            stmt.setInt(2, añoActual);
+                            ResultSet rs = stmt.executeQuery();
+
+                            while (rs.next()) {
+                    %>
+                    <tr>
+                        <td><%= rs.getDate("fechaCompra") %></td>
+                        <td><%= rs.getString("nombreTienda") %></td>
+                        <td><%= rs.getDouble("importeCompra") %> €</td>
+                        <td><a href="editarCompra.jsp?id=<%= rs.getInt("idCompra") %>" class="btn btn-warning">Editar</a></td>
+                        <td><a href="#" onclick="confirmarBorrado(<%= rs.getInt("idCompra") %>)" class="btn btn-danger">Borrar</a></td>
+                    </tr>
+                    <%
+                            }
+                            rs.close();
+                            stmt.close();
+                            conn.close();
+                        } catch (Exception e) {
+                            out.println("<script>alert('Error al cargar las compras: " + e.getMessage() + "');</script>");
+                            e.printStackTrace(); // Imprime el stack trace en la consola del servidor
+                        }
                     %>
                 </tbody>
             </table>
@@ -54,6 +97,7 @@
             <a href="nuevaCompra.jsp" class="btn btn-primary">Nueva Compra</a>
             <a href="tiendas.jsp" class="btn btn-secondary">Gestionar Tiendas</a>
             <a href="informes.jsp" class="btn btn-info">Generar Informe</a>
+            <a href="LogoutServlet" class="btn btn-danger">Logout</a>
         </div>
     </div>
 
