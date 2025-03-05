@@ -28,6 +28,19 @@
             }
         }
     </script>
+    <script>
+        // Mostrar mensaje de éxito o error
+        <%
+            String mensaje = request.getParameter("mensaje");
+            if (mensaje != null) {
+        %>
+        <script>
+            alert('<%= mensaje %>');
+        </script>
+        <%
+            }
+        %>
+    </script>
 </head>
 <body>
     <div class="container">
@@ -69,13 +82,18 @@
                             stmt.setInt(2, añoActual);
                             ResultSet rs = stmt.executeQuery();
 
+                            SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
+                            SimpleDateFormat formatoFechaEdicion = new SimpleDateFormat("yyyy-MM-dd");
+
                             while (rs.next()) {
+                                String fechaFormateada = formatoFecha.format(rs.getDate("fechaCompra"));
+                                String fechaEdicion = formatoFechaEdicion.format(rs.getDate("fechaCompra"));
                     %>
                     <tr>
-                        <td><%= rs.getDate("fechaCompra") %></td>
+                        <td><%= fechaFormateada %></td>
                         <td><%= rs.getString("nombreTienda") %></td>
                         <td><%= rs.getDouble("importeCompra") %> €</td>
-                        <td><a href="editarCompra.jsp?id=<%= rs.getInt("idCompra") %>&fecha=<%= rs.getDate("fechaCompra") %>&importe=<%= rs.getDouble("importeCompra") %>&tienda=<%= rs.getInt("idTiendaFK") %>" class="btn btn-warning">Editar</a></td>
+                        <td><a href="editarCompra.jsp?id=<%= rs.getInt("idCompra") %>&fecha=<%= fechaEdicion %>&importe=<%= rs.getDouble("importeCompra") %>&tienda=<%= rs.getInt("idTiendaFK") %>" class="btn btn-warning">Editar</a></td>
                         <td><a href="#" onclick="confirmarBorrado(<%= rs.getInt("idCompra") %>)" class="btn btn-danger">Borrar</a></td>
                     </tr>
                     <%
@@ -106,5 +124,3 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
-
-
