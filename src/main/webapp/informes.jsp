@@ -47,9 +47,10 @@
                     <%
                         List<String> mesesConCompras = new ArrayList<>();
                         try (Connection conn = ConexionBD.getConnection()) {
-                            String query = "SELECT DISTINCT MONTH(fechaCompra) AS mes, YEAR(fechaCompra) AS anio FROM Compras ORDER BY anio DESC, mes DESC";
+                        	int idUsuario = Integer.parseInt(session.getAttribute("idUsuario").toString()); 
+                        	String query = "SELECT DISTINCT MONTH(fechaCompra) AS mes, YEAR(fechaCompra) AS anio FROM Compras WHERE idUsuarioFK = "+ idUsuario +" ORDER BY anio DESC, mes DESC";
                             try (PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
-                                while (rs.next()) {
+                            	while (rs.next()) {
                                     int mes = rs.getInt("mes");
                                     int anio = rs.getInt("anio");
                                     String mesAnio = obtenerNombreMes(mes) + " de " + anio;
@@ -81,13 +82,15 @@
                 String[] partes = mesAnioSeleccionado.split(" de ");
                 int mes = obtenerNumeroMes(partes[0]);
                 int anio = Integer.parseInt(partes[1]);
+                int idUsuario = Integer.parseInt(session.getAttribute("idUsuario").toString());
 
                 try (Connection conn = ConexionBD.getConnection()) {
                     // Calcular el total gastado en el mes seleccionado
-                    String queryTotal = "SELECT SUM(importeCompra) AS totalGastado FROM Compras WHERE MONTH(fechaCompra) = ? AND YEAR(fechaCompra) = ?";
+                    String queryTotal = "SELECT SUM(importeCompra) AS totalGastado FROM Compras WHERE MONTH(fechaCompra) = ? AND YEAR(fechaCompra) = ? AND idUsuarioFK = ?";
                     try (PreparedStatement stmtTotal = conn.prepareStatement(queryTotal)) {
                         stmtTotal.setInt(1, mes);
                         stmtTotal.setInt(2, anio);
+                        stmtTotal.setInt(3, idUsuario);
                         ResultSet rsTotal = stmtTotal.executeQuery();
                         double totalGastado = rsTotal.next() ? rsTotal.getDouble("totalGastado") : 0;
 
@@ -95,14 +98,16 @@
                         String queryDesglose = "SELECT c.idCompra, c.fechaCompra, t.nombreTienda, c.importeCompra, c.idTiendaFK " +
                                                "FROM Compras c " +
                                                "JOIN Tiendas t ON c.idTiendaFK = t.idTienda " +
-                                               "WHERE MONTH(c.fechaCompra) = ? AND YEAR(c.fechaCompra) = ? " +
+                                               "WHERE MONTH(c.fechaCompra) = ? AND YEAR(c.fechaCompra) = ? AND idUsuarioFK = ? " +
                                                "ORDER BY c.fechaCompra DESC";
                         try (PreparedStatement stmtDesglose = conn.prepareStatement(queryDesglose)) {
                             stmtDesglose.setInt(1, mes);
                             stmtDesglose.setInt(2, anio);
+                            stmtDesglose.setInt(3, idUsuario);
                             ResultSet rsDesglose = stmtDesglose.executeQuery();
 
                             SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
+                            SimpleDateFormat formatoFechaEdicion = new SimpleDateFormat("yyyy-MM-dd");
         %>
         <h3>Informe de Compras para <%= mesAnioSeleccionado %></h3>
         <h4>Total Gastado: <%= totalGastado %> €</h4>
@@ -121,12 +126,13 @@
                     <%
                         while (rsDesglose.next()) {
                             String fechaFormateada = formatoFecha.format(rsDesglose.getDate("fechaCompra"));
+                            String fechaEdicion = formatoFechaEdicion.format(rsDesglose.getDate("fechaCompra"));
                     %>
                     <tr>
                         <td><%= fechaFormateada %></td>
                         <td><%= rsDesglose.getString("nombreTienda") %></td>
                         <td><%= rsDesglose.getDouble("importeCompra") %> €</td>
-                        <td><a href="editarCompra.jsp?id=<%= rsDesglose.getInt("idCompra") %>&fecha=<%= fechaFormateada %>&importe=<%= rsDesglose.getDouble("importeCompra") %>&tienda=<%= rsDesglose.getInt("idTiendaFK") %>" class="btn btn-warning">Editar</a></td>
+                        <td><a href="editarCompra.jsp?id=<%= rsDesglose.getInt("idCompra") %>&fecha=<%= fechaEdicion %>&importe=<%= rsDesglose.getDouble("importeCompra") %>&tienda=<%= rsDesglose.getInt("idTiendaFK") %>" class="btn btn-warning">Editar</a></td>
                         <td><a href="#" onclick="confirmarBorrado(<%= rsDesglose.getInt("idCompra") %>)" class="btn btn-danger">Borrar</a></td>
                     </tr>
                     <%

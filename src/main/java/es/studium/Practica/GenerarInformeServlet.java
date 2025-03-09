@@ -11,21 +11,25 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @WebServlet("/GenerarInformeServlet")
 public class GenerarInformeServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String mesAnio = request.getParameter("mes");
+    	HttpSession session = request.getSession();
+    	String mesAnio = request.getParameter("mes");
         String[] partes = mesAnio.split(" de ");
         int mes = obtenerNumeroMes(partes[0]);
         int anio = Integer.parseInt(partes[1]);
-
+        int idUsuarioFK = Integer.parseInt(session.getAttribute("idUsuario").toString());
+        
         try (Connection conn = ConexionBD.getConnection()) {
             // Calcular el total gastado en el mes seleccionado
-            String queryTotal = "SELECT SUM(importeCompra) AS totalGastado FROM Compras WHERE MONTH(fechaCompra) = ? AND YEAR(fechaCompra) = ?";
+            String queryTotal = "SELECT SUM(importeCompra) AS totalGastado FROM Compras WHERE MONTH(fechaCompra) = ? AND YEAR(fechaCompra) = ? AND idUsuarioFK = ? ";
             try (PreparedStatement stmtTotal = conn.prepareStatement(queryTotal)) {
                 stmtTotal.setInt(1, mes);
                 stmtTotal.setInt(2, anio);
+                stmtTotal.setInt(3, idUsuarioFK);
                 ResultSet rsTotal = stmtTotal.executeQuery();
                 double totalGastado = rsTotal.next() ? rsTotal.getDouble("totalGastado") : 0;
 

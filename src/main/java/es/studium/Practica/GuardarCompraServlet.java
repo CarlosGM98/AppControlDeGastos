@@ -9,14 +9,16 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @WebServlet("/GuardarCompraServlet")
 public class GuardarCompraServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String fechaCompra = request.getParameter("fechaCompra");
+    	HttpSession session = request.getSession();
+    	String fechaCompra = request.getParameter("fechaCompra");
         double importeCompra = Double.parseDouble(request.getParameter("importeCompra"));
         int idTiendaFK = Integer.parseInt(request.getParameter("idTiendaFK"));
-        int idUsuarioFK = 1; // Aquí debes obtener el ID del usuario logueado
+        int idUsuarioFK = Integer.parseInt(session.getAttribute("idUsuario").toString()); // Aquí debes obtener el ID del usuario logueado
 
         try (Connection conn = ConexionBD.getConnection()) {
             String query = "INSERT INTO Compras (fechaCompra, importeCompra, idUsuarioFK, idTiendaFK) VALUES (?, ?, ?, ?)";

@@ -4,12 +4,20 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @WebServlet("/LoginServlet")
 public class LoginServlet extends HttpServlet {
@@ -25,6 +33,14 @@ public class LoginServlet extends HttpServlet {
             Usuario user = validarUsuario(usuario, clave);
             if (user != null) {
                 // Redirigir a la página principal si las credenciales son correctas
+            	int idUser = user.getIdUsuario();
+            	HttpSession session = request.getSession();
+            	session.setAttribute("idUsuario", idUser+""); //Permite usar el ID autenticado en el restod e la app
+//            	String nextPage = "/principal.jsp";
+//            	ServletContext servletContext = getServletContext(); 
+//            	  RequestDispatcher requestDispatcher = 
+//            	servletContext.getRequestDispatcher(nextPage); 
+//            	  requestDispatcher.forward(request,  response); 
                 response.sendRedirect("principal.jsp");
             } else {
                 // Mostrar error si las credenciales son incorrectas

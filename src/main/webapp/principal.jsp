@@ -75,11 +75,13 @@
                             String query = "SELECT c.fechaCompra, t.nombreTienda, c.importeCompra, c.idCompra, c.idTiendaFK " +
                                            "FROM Compras c " +
                                            "JOIN Tiendas t ON c.idTiendaFK = t.idTienda " +
-                                           "WHERE MONTH(c.fechaCompra) = ? AND YEAR(c.fechaCompra) = ? " +
+                                           "WHERE MONTH(c.fechaCompra) = ? AND YEAR(c.fechaCompra) = ? AND idUsuarioFK = ? " +
                                            "ORDER BY c.fechaCompra DESC";
+                            int idUsuario = Integer.parseInt(session.getAttribute("idUsuario").toString()); 
                             PreparedStatement stmt = conn.prepareStatement(query);
                             stmt.setInt(1, mesActual);
                             stmt.setInt(2, añoActual);
+                            stmt.setInt(3, idUsuario);
                             ResultSet rs = stmt.executeQuery();
 
                             SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
